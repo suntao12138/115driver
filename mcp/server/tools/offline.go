@@ -31,7 +31,7 @@ type ListOfflineTaskArgs struct {
 // AddOfflineTaskURIsArgs defines arguments for adding offline tasks
 type AddOfflineTaskURIsArgs struct {
 	URIs      []string `json:"uris" jsonschema:"download URIs, supports http, ed2k, magnet"`
-	SaveDirID string   `json:"save_dir_id" jsonschema:"directory ID to save downloaded files"`
+	SaveDirID string   `json:"save_dir_id,omitempty" jsonschema:"directory ID to save downloaded files, leave empty to use config default"`
 }
 
 // DeleteOfflineTasksArgs defines arguments for deleting offline tasks
