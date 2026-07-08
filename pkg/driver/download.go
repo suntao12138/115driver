@@ -17,6 +17,23 @@ type FileDownloadUrl struct {
 	Url    string  `json:"url"`
 }
 
+// UnmarshalJSON handles both object and bool (false) responses from the API.
+func (f *FileDownloadUrl) UnmarshalJSON(b []byte) error {
+	// Handle false/null/empty cases
+	if len(b) == 0 || string(b) == "false" || string(b) == "null" {
+		*f = FileDownloadUrl{}
+		return nil
+	}
+	// Handle object case
+	type alias FileDownloadUrl
+	var a alias
+	if err := json.Unmarshal(b, &a); err != nil {
+		return err
+	}
+	*f = FileDownloadUrl(a)
+	return nil
+}
+
 type DownloadInfo struct {
 	FileName string          `json:"file_name"`
 	FileSize StringInt64     `json:"file_size"`
