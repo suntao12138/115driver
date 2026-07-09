@@ -37,6 +37,11 @@ A comprehensive Go library, CLI tool, and MCP server for [115 cloud storage](htt
 
 **MCP Server** — [Model Context Protocol](https://modelcontextprotocol.io/) server for AI application integration (Claude Desktop, Cursor, etc.).
 
+> ✨ **Fork Enhancements** — This fork (Suntoa12138/115driver) includes additional improvements beyond upstream:
+> - **Config-file-based authentication** — MCP server reads cookies and config from `~/.115driver/config.toml`, no need to pass `--cookie` on every launch
+> - **Default offline save directory** — Both CLI and MCP respect `default_offline_save_dir` from configuration
+> - **API compatibility fixes** — Handles 115 API response format changes for `imei_info` and download URL fields
+
 ## Installation
 
 ```bash
@@ -275,6 +280,23 @@ mcp --cookie="UID=xxx;CID=xxx;SEID=xxx;KID=xxx"
 | **Share** | `getShareSnap` |
 | **Recycle** | `listRecycleBin`, `revertRecycleBin`, `cleanRecycleBin` |
 
+### Config File Authentication (Fork Feature)
+
+The `--cookie` flag can be omitted if `~/.115driver/config.toml` has a valid cookie:
+
+```bash
+# Use default profile from config
+./115driver-mcp-server --profile main
+
+# Or rely on environment variables
+DRIVER115_PROFILE=main ./115driver-mcp-server
+```
+
+Config file priority: `--config` flag > `DRIVER115_CONFIG` env var > `~/.115driver/config.toml`.
+Profile priority: `--profile` flag > `DRIVER115_PROFILE` env var > `default_profile` in config > `main`.
+
+The `addOfflineTaskURIs` tool's `save_dir_id` parameter is now optional — if omitted, the `default_offline_save_dir` from config (if set) is used automatically. Run `115driver login` first to generate the config file.
+
 ### Configure with Claude Desktop
 
 Add to your `claude_desktop_config.json`:
@@ -375,6 +397,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
             <img src="https://avatars.githubusercontent.com/u/2384040?v=4" width="100;" alt="power721"/>
             <br />
             <sub><b>power721</b></sub>
+        </a>
+    </td></tr>
+    <td align="center">
+        <a href="https://github.com/suntao12138">
+            <img src="https://avatars.githubusercontent.com/u/168153569?v=4" width="100;" alt="suntao12138"/>
+            <br />
+            <sub><b>suntao12138</b></sub>
         </a>
     </td></tr>
 </table>
