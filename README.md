@@ -44,8 +44,18 @@ A comprehensive Go library, CLI tool, and MCP server for [115 cloud storage](htt
 
 ## Installation
 
+> **⚠️ 这是一个增强版 fork。** 本项目已集成以下上游未合并的改进：
+> - 配置文件认证（MCP 支持 `--profile` 从配置读 Cookie）
+> - 默认离线目录（CLI & MCP 支持 `default_offline_save_dir`）
+> - API 兼容修复（适配 115 接口 `imei_info` 和下载 URL 字段变更）
+>
+> 下方所有安装命令均指向本 fork 的增强版本。
+
 ```bash
+# 作为 Go 库使用（在你的 go.mod 中添加 replace 指向本 fork）
 go get github.com/SheltonZhu/115driver
+# 然后添加 replace 指令：
+# go mod edit -replace github.com/SheltonZhu/115driver=github.com/suntao12138/115driver@latest
 ```
 
 ## Quick Start
@@ -144,10 +154,11 @@ taskIDs, err := client.AddOfflineTaskURIs(
 
 115driver includes a CLI tool for interacting with 115 cloud storage from the command line, designed for both human use (colored table output) and AI agent consumption (`--json` flag).
 
-### Install
+### Install (增强版)
 
 ```bash
-go install github.com/SheltonZhu/115driver/cmd/115driver@latest
+# 安装本 fork 的增强版 CLI
+go install github.com/suntao12138/115driver/cmd/115driver@latest
 ```
 
 ### Authentication
@@ -242,18 +253,20 @@ echo 'source <(115driver completion zsh)' >> ~/.zshrc
 
 115driver includes an MCP (Model Context Protocol) server for AI application integration (Claude Desktop, Cursor, etc.).
 
-### Install
+### Install (增强版)
 
 **Option 1: go install**
 
 ```bash
-go install github.com/SheltonZhu/115driver/mcp@latest
+# 安装本 fork 的增强版 MCP 服务端
+go install github.com/suntao12138/115driver/mcp@latest
 ```
 
 **Option 2: build from source**
 
 ```bash
-git clone https://github.com/SheltonZhu/115driver.git
+# 克隆本 fork 的增强版仓库
+git clone https://github.com/suntao12138/115driver.git
 cd 115driver
 go build -o 115driver-mcp-server ./mcp/
 ```
@@ -262,10 +275,11 @@ go build -o 115driver-mcp-server ./mcp/
 
 ```bash
 # If installed via go install:
-mcp --cookie="UID=xxx;CID=xxx;SEID=xxx;KID=xxx"
+mcp --profile main          # 从配置文件读取 Cookie（推荐）
+mcp --cookie="UID=xxx;CID=xxx;SEID=xxx;KID=xxx"  # 或直接传 Cookie
 
 # If built from source:
-./115driver-mcp-server --cookie="UID=xxx;CID=xxx;SEID=xxx;KID=xxx"
+./115driver-mcp-server --profile main
 ```
 
 ### Available Tools
@@ -306,11 +320,13 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "115driver": {
       "command": "mcp",
-      "args": ["--cookie=UID=xxx;CID=xxx;SEID=xxx;KID=xxx"]
+      "args": ["--profile", "main"]
     }
   }
 }
 ```
+
+> **提示：** 如果使用本 fork 的增强版（直接 `go install` 或本地编译），请将 `command` 改为 `115driver-mcp-server` 或对应二进制路径。使用 `--profile main` 会从 `~/.115driver/config.toml` 自动读取 Cookie，无需在配置中暴露密钥。运行 `115driver login` 生成配置文件后再启动 MCP。
 
 ## API Reference
 
