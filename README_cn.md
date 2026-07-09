@@ -1,5 +1,7 @@
 # 115driver
 
+> **中文 | [English](README.md) 🌐**
+
 适用于 [115 云盘](https://115.com) 的全功能 Go 库、CLI 工具和 MCP 服务端。提供对 115.com API 的完整驱动支持，包括登录、文件操作、上传/下载、离线下载等。
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/SheltonZhu/115driver)](https://goreportcard.com/report/github.com/SheltonZhu/115driver)

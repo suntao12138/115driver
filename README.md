@@ -1,5 +1,7 @@
 # 115driver
 
+> **🌐 [中文说明](README_cn.md) | English**
+
 A comprehensive Go library, CLI tool, and MCP server for [115 cloud storage](https://115.com). It provides a full-featured driver for 115.com's API, supporting login, file operations, upload/download, offline downloads, and more.
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/SheltonZhu/115driver)](https://goreportcard.com/report/github.com/SheltonZhu/115driver)
