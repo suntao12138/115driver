@@ -15,6 +15,7 @@ type FileDownloadUrl struct {
 	Client float64 `json:"client"`
 	OSSID  string  `json:"oss_id"`
 	Url    string  `json:"url"`
+	Valid  bool    `json:"-"` // false when API returned false/null
 }
 
 // UnmarshalJSON handles both object and bool (false) responses from the API.
@@ -31,6 +32,7 @@ func (f *FileDownloadUrl) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	*f = FileDownloadUrl(a)
+	f.Valid = true
 	return nil
 }
 
