@@ -11,13 +11,15 @@ import (
 
 // OfflineTools holds offline-related MCP tools
 type OfflineTools struct {
-	client *driver.Pan115Client
+	client         *driver.Pan115Client
+	defaultSaveDir string
 }
 
 // NewOfflineTools creates a new OfflineTools instance
-func NewOfflineTools(client *driver.Pan115Client) *OfflineTools {
+func NewOfflineTools(client *driver.Pan115Client, defaultSaveDir string) *OfflineTools {
 	return &OfflineTools{
-		client: client,
+		client:         client,
+		defaultSaveDir: defaultSaveDir,
 	}
 }
 
@@ -29,7 +31,7 @@ type ListOfflineTaskArgs struct {
 // AddOfflineTaskURIsArgs defines arguments for adding offline tasks
 type AddOfflineTaskURIsArgs struct {
 	URIs      []string `json:"uris" jsonschema:"download URIs, supports http, ed2k, magnet"`
-	SaveDirID string   `json:"save_dir_id" jsonschema:"directory ID to save downloaded files"`
+	SaveDirID string   `json:"save_dir_id,omitempty" jsonschema:"directory ID to save downloaded files, leave empty to use config default"`
 }
 
 // DeleteOfflineTasksArgs defines arguments for deleting offline tasks
@@ -150,7 +152,37 @@ func (ot *OfflineTools) addOfflineTaskURIs(ctx context.Context, req *mcp.CallToo
 		}, nil, nil
 	}
 
-	hashes, err := ot.client.AddOfflineTaskURIs(args.URIs, args.SaveDirID)
+	saveDirID := args.SaveDirID
+	if saveDirID == "" && ot.defaultSaveDir != "" {
+		// Resolve default save directory name to ID
+		resp, err := ot.client.DirName2CID(ot.defaultSaveDir)
+		if err != nil {
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{
+					&mcp.TextContent{
+						Text: fmt.Sprintf("Default save directory not found (from config default_offline_save_dir): %s", ot.defaultSaveDir),
+					},
+				},
+				IsError: true,
+			}, nil, nil
+		}
+		if string(resp.CategoryID) == "0" {
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{
+					&mcp.TextContent{
+						Text: fmt.Sprintf("Default save directory not found (from config default_offline_save_dir): %s", ot.defaultSaveDir),
+					},
+				},
+				IsError: true,
+			}, nil, nil
+		}
+		saveDirID = string(resp.CategoryID)
+	}
+	if saveDirID == "" {
+		saveDirID = "0"
+	}
+
+	hashes, err := ot.client.AddOfflineTaskURIs(args.URIs, saveDirID)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{

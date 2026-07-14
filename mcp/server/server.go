@@ -11,8 +11,9 @@ import (
 
 // Server represents the 115driver MCP server
 type Server struct {
-	mcpServer *mcp.Server
-	client    *driver.Pan115Client
+	mcpServer       *mcp.Server
+	client          *driver.Pan115Client
+	defaultSaveDir  string
 }
 
 // NewServer creates a new 115driver MCP server
@@ -28,6 +29,12 @@ func NewServer() *Server {
 // WithClient sets the 115 driver client for the server
 func (s *Server) WithClient(client *driver.Pan115Client) *Server {
 	s.client = client
+	return s
+}
+
+// WithDefaultSaveDir sets the default offline download directory name
+func (s *Server) WithDefaultSaveDir(dir string) *Server {
+	s.defaultSaveDir = dir
 	return s
 }
 
@@ -71,6 +78,6 @@ func (s *Server) registerTools() {
 	searchTools.RegisterTools(s.mcpServer)
 
 	// Register offline tools
-	offlineTools := tools.NewOfflineTools(s.client)
+	offlineTools := tools.NewOfflineTools(s.client, s.defaultSaveDir)
 	offlineTools.RegisterTools(s.mcpServer)
 }
