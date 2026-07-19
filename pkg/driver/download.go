@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	crypto "github.com/SheltonZhu/115driver/pkg/crypto/m115"
-	"github.com/go-resty/resty/v2"
 )
 
 type FileDownloadUrl struct {
@@ -46,13 +45,21 @@ type DownloadInfo struct {
 
 // Get Download file from download info url
 func (info *DownloadInfo) Get() (io.ReadSeeker, error) {
-	req := resty.New().R().SetHeaderMultiValues(info.Header)
-	resp, err := req.Get(info.Url.Url)
+	req, err := http.NewRequest(http.MethodGet, info.Url.Url, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	return bytes.NewReader(resp.Body()), nil
+	req.Header = info.Header.Clone()
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(body), nil
 }
 
 type DownloadData map[string]*DownloadInfo
@@ -73,9 +80,7 @@ func (c *Pan115Client) DownloadWithUA(pickCode, ua string) (*DownloadInfo, error
 		SetFormData(map[string]string{"data": data}).
 		ForceContentType("application/json").
 		SetResult(&result)
-	if len(ua) > 0 {
-		req = req.SetHeader("User-Agent", ua)
-	}
+	req = req.SetHeader("User-Agent", ua)
 	resp, err := req.Post(ApiDownloadGetUrl)
 
 	if err := CheckErr(err, &result, resp); err != nil {
@@ -117,9 +122,7 @@ func (c *Pan115Client) DownloadWithUAByAndroidAPI(pickCode string, ua string) (*
 		SetFormData(map[string]string{"data": data}).
 		ForceContentType("application/json").
 		SetResult(&result)
-	if len(ua) > 0 {
-		req = req.SetHeader("User-Agent", ua)
-	}
+	req = req.SetHeader("User-Agent", ua)
 	resp, err := req.Post(AndroidApiDownloadGetUrl)
 
 	if err := CheckErr(err, &result, resp); err != nil {
@@ -210,11 +213,9 @@ func (c *Pan115Client) DownloadByShareCodeWithUA(ua, shareCode, receiveCode, fil
 		SetQueryParams(params).
 		ForceContentType("application/json").
 		SetHeader("referer", BuildShareReferer(shareCode, receiveCode)).
+		SetHeader("User-Agent", ua).
 		SetResult(&result)
 
-	if len(ua) > 0 {
-		req = req.SetHeader("User-Agent", ua)
-	}
 	resp, err := req.Get(ApiDownloadGetShareUrl)
 
 	if err := CheckErr(err, &result, resp); err != nil {
